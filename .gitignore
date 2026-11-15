@@ -1,0 +1,23 @@
+# Ket qua build (tao lai bang scripts/build_host.ps1 va platformio)
+build/
+.pio/
+*.exe
+*.pdb
+*.o
+*.elf
+*.bin
+*.hex
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE / cong cu
+.vscode/
+.idea/
+.claude/
+
+# He dieu hanh
+.DS_Store
+Thumbs.db
+desktop.ini

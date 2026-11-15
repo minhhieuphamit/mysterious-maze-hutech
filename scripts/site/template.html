@@ -1,0 +1,371 @@
+<title>Sổ tay Mysterious Maze</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Bo cuc: thanh tieu de dinh + menu doc ben trai (desktop) / hang chip cuon ngang (dien thoai);
+   noi dung 1 cot ~72 ky tu. Mau lay tu sa ban: tuong do tren nen den, duong tham do xanh. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --sunken: #eceef2;
+  --fg: #16181d;
+  --muted: #5b6170;
+  --line: #d9dce3;
+  --accent: #d42a1f;          /* do tuong me cung BTC */
+  --accent-soft: #fbe6e4;
+  --link: #1f5fbf;
+  --path: #2f7fe0;            /* xanh duong tham do */
+  --warn-bg: #fff4dd;
+  --warn-line: #e3a72f;
+  --code-bg: #1d2027;
+  --code-fg: #e9ebf0;
+  --font-body: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Space Grotesk", "Be Vietnam Pro", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #191c22; --sunken: #20242c; --fg: #e8eaef; --muted: #9aa1b0;
+    --line: #2c313b; --accent: #ff5a4c; --accent-soft: #3a1b1a; --link: #7cb1ff; --path: #5aa6ff;
+    --warn-bg: #2e2513; --warn-line: #b8862a; --code-bg: #0b0d10; --code-fg: #e9ebf0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #191c22; --sunken: #20242c; --fg: #e8eaef; --muted: #9aa1b0;
+  --line: #2c313b; --accent: #ff5a4c; --accent-soft: #3a1b1a; --link: #7cb1ff; --path: #5aa6ff;
+  --warn-bg: #2e2513; --warn-line: #b8862a; --code-bg: #0b0d10; --code-fg: #e9ebf0;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 16px/1.65 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 30; background: var(--surface);
+}
+a { color: var(--link); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- Thanh tieu de ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.topbar-in { display: flex; align-items: center; gap: 12px; min-height: 56px; max-width: 1200px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); min-width: 0; }
+.brand svg { flex: none; }
+.brand b { font: 700 17px/1.1 var(--font-head); letter-spacing: .02em; white-space: nowrap; }
+.brand small { display: block; font: 500 12px/1.2 var(--font-body); color: var(--muted); }
+.theme-btn {
+  margin-left: auto; flex: none; border: 1px solid var(--line); background: var(--sunken); color: var(--fg);
+  border-radius: 8px; padding: 6px 10px; font: 500 13px var(--font-body); cursor: pointer;
+}
+
+/* ---------- Khung ---------- */
+.shell {
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px;
+  max-width: 1200px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.sidenav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 76px); align-self: start; display: flex; flex-direction: column; gap: 2px; }
+.sidenav a {
+  display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; border-radius: 8px;
+  color: var(--fg); text-decoration: none; font-size: 15px;
+}
+.sidenav a .n { font: 600 12px var(--font-mono); color: var(--muted); width: 18px; flex: none; }
+.sidenav a:hover { background: var(--sunken); }
+.sidenav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.sidenav a[aria-current="page"] .n { color: var(--accent); }
+.sidenav .home-link { margin-bottom: 8px; font-weight: 600; }
+main { min-width: 0; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 0 56px; }
+  .sidenav {
+    position: sticky; top: calc(env(safe-area-inset-top, 0px) + 56px); z-index: 15;
+    flex-direction: row; overflow-x: auto; gap: 6px; padding: 10px 0;
+    margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--bg); border-bottom: 1px solid var(--line); scrollbar-width: none;
+  }
+  .sidenav::-webkit-scrollbar { display: none; }
+  .sidenav a { flex: none; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); padding: 5px 12px; font-size: 14px; }
+  .sidenav .home-link { margin-bottom: 0; }
+  main { padding-top: 20px; }
+}
+
+/* ---------- Van ban ---------- */
+.doc-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+.doc-num { font: 700 15px var(--font-mono); color: var(--accent); }
+h1, h2, h3, h4 { font-family: var(--font-head); text-wrap: balance; line-height: 1.25; }
+h1 { font-size: clamp(26px, 4vw, 34px); margin: 0; letter-spacing: -0.01em; }
+.prose { max-width: 74ch; }
+.prose h2 { font-size: 23px; margin: 44px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.prose h3 { font-size: 18px; margin: 28px 0 8px; }
+.prose h4 { font-size: 16px; margin: 22px 0 6px; }
+.prose p, .prose li { color: var(--fg); }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose li { margin: 4px 0; }
+.prose li.task { list-style: none; margin-left: -1.4em; display: flex; gap: 8px; align-items: baseline; }
+.prose li.task input { accent-color: var(--accent); transform: translateY(2px); }
+.prose hr { border: 0; border-top: 2px dashed var(--line); margin: 40px 0; }
+code { font: 0.88em var(--font-mono); background: var(--sunken); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.code { position: relative; margin: 14px 0; border-radius: 10px; background: var(--code-bg); min-width: 0; }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; color: var(--code-fg); font: 13.5px/1.55 var(--font-mono); }
+.code pre code { background: none; padding: 0; color: inherit; font: inherit; overflow-wrap: normal; }
+.code.cmd pre { padding-right: 76px; }
+.code.cmd pre::before { content: "$ "; color: #8a93a5; }
+.copy {
+  position: absolute; top: 8px; right: 8px; border: 1px solid #3a404c; background: #262a33; color: #e9ebf0;
+  border-radius: 6px; padding: 3px 10px; font: 600 12px var(--font-body); cursor: pointer;
+}
+.copy:hover { background: #313642; }
+.table { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 12px; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font: 600 13px var(--font-body); color: var(--muted); background: var(--sunken); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.note { margin: 16px 0; padding: 12px 16px; border-left: 4px solid var(--path); background: var(--sunken); border-radius: 0 8px 8px 0; }
+.note.warn { border-left-color: var(--warn-line); background: var(--warn-bg); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 18px 0 6px; max-width: 74ch; }
+.toc span { font: 600 12px var(--font-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 4px; }
+.toc button {
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px;
+  padding: 3px 11px; font: 500 13px var(--font-body); cursor: pointer;
+}
+.toc button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- Trang chu ---------- */
+.hero { display: grid; gap: 10px; margin-bottom: 26px; max-width: 74ch; }
+.eyebrow { font: 600 12px var(--font-body); text-transform: uppercase; letter-spacing: .12em; color: var(--accent); }
+.hero h1 { font-size: clamp(30px, 5.2vw, 46px); }
+.hero p { margin: 0; color: var(--muted); font-size: 17px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 22px 0 30px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+.stat b { font: 700 26px/1.1 var(--font-head); font-variant-numeric: tabular-nums; }
+.stat b small { font-size: 15px; font-weight: 600; color: var(--muted); }
+.stat span { font-size: 13.5px; color: var(--muted); }
+@media (max-width: 760px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.maze-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-bottom: 34px; }
+@media (max-width: 960px) { .maze-card { grid-template-columns: minmax(0, 1fr); } }
+.maze-fig { margin: 0; background: #1b1d22; border-radius: 14px; padding: 10px; border: 1px solid var(--line); }
+.maze-fig svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.seg button { border: 0; background: var(--surface); color: var(--fg); padding: 7px 14px; font: 600 14px var(--font-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.maze-text h2 { font-size: 22px; margin: 0 0 8px; }
+.maze-text p { margin: 0 0 10px; color: var(--muted); }
+.legend { display: grid; gap: 6px; margin: 12px 0; font-size: 14px; }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 8px; }
+
+.read-order { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .read-order { grid-template-columns: minmax(0, 1fr); } }
+.read-order a {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 10px; text-decoration: none; color: var(--fg);
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); height: 100%;
+}
+.read-order a:hover { border-color: var(--accent); }
+.read-order .n { grid-row: span 2; font: 700 17px var(--font-mono); color: var(--accent); }
+.read-order strong { font-family: var(--font-head); font-size: 16px; }
+.read-order span:last-child { font-size: 13.5px; color: var(--muted); }
+.home h2 { font-size: 23px; margin: 36px 0 12px; }
+.home .prose h2 { border-top: 0; padding-top: 0; }
+@media (prefers-reduced-motion: no-preference) { .doc:not([hidden]) { animation: fade .18s ease-out; } }
+@keyframes fade { from { opacity: .6; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#tong-quan" aria-label="Về trang tổng quan">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="1" y="1" width="28" height="28" rx="5" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <path d="M8 1v10h7M22 29V17h-7v-6M1 20h7" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <circle cx="15" cy="20" r="2.6" fill="var(--path)"/>
+      </svg>
+      <span><b>MYSTERIOUS MAZE 2026</b><small>Sổ tay đội thi Micromouse</small></span>
+    </a>
+    <button class="theme-btn" id="themeBtn" type="button">Giao diện: Tự động</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidenav" aria-label="Mục lục">
+    <a href="#tong-quan" data-nav="tong-quan" class="home-link"><span class="n">★</span>Tổng quan</a>
+    {{NAV}}
+  </nav>
+
+  <main id="main">
+    <section class="doc home" id="view-tong-quan" data-view="tong-quan">
+      <div class="hero">
+        <span class="eyebrow">Khoa Cơ khí - Tự động hóa · HUTECH</span>
+        <h1>Think Smart – Move Fast – Conquer the Maze</h1>
+        <p>Robot Micromouse STM32 tự dò mê cung 16×16 (ô 180 mm lọt lòng, tường 12 mm, bước ô 192 mm) và chạy về 4 ô đích trung tâm nhanh nhất có thể. Trang này gộp toàn bộ tài liệu của project cho cả đội.</p>
+      </div>
+
+      <div class="stats" aria-label="Kết quả mô phỏng trên mê cung mẫu của BTC">
+        <div class="stat"><b>73 <small>ô</small></b><span>Tới đích lần đầu (~45 s)</span></div>
+        <div class="stat"><b>246 <small>ô</small></b><span>Dò đủ để chắc tối ưu; 120 ô nếu dùng SEARCH+MAP</span></div>
+        <div class="stat"><b>7.0 <small>s</small></b><span>Speed run RUN3 (chạy chéo), ước lượng lý tưởng</span></div>
+        <div class="stat"><b>0</b><span>Va chạm trong 300 mê cung mô phỏng (thân ≤ 100 mm)</span></div>
+      </div>
+
+      <div class="maze-card">
+        <figure class="maze-fig" aria-label="Mô phỏng robot chạy trên mê cung mẫu của BTC">
+          <div id="svgSearch">{{SVG_SEARCH}}</div>
+          <div id="svgMap" hidden>{{SVG_MAP}}</div>
+        </figure>
+        <div class="maze-text">
+          <h2>Mê cung mẫu của BTC</h2>
+          <p>Hình 1 trong thể lệ, số hóa tự động từ PDF. Robot mô phỏng chạy bằng đúng thuật toán trong firmware.</p>
+          <div class="seg" role="group" aria-label="Chọn chế độ thăm dò">
+            <button type="button" id="btnSearch" aria-pressed="true">SEARCH</button>
+            <button type="button" id="btnMap" aria-pressed="false">SEARCH+MAP</button>
+          </div>
+          <div class="legend">
+            <div><i style="background:#4ea3ff"></i>Đường robot đi khi thăm dò</div>
+            <div><i style="background:#ffd24a"></i>Speed run: đoạn thẳng</div>
+            <div><i style="background:#ff5c8a"></i>Speed run: đoạn chéo</div>
+            <div><i style="background:#5cff9d"></i>Speed run: đường cong</div>
+          </div>
+          <p id="mazeNote">SEARCH: không biết trước mê cung, robot dò 246 ô rồi mới chắc chắn có đường tối ưu.</p>
+        </div>
+      </div>
+
+      <aside class="note warn">⚠️ Code đã được kiểm chứng bằng biên dịch và mô phỏng, <strong>chưa chạy trên robot thật</strong> của đội. Phải lắp ráp và calib theo tài liệu trước khi thi.</aside>
+
+      <h2>Đọc theo thứ tự</h2>
+      <ol class="read-order">
+        <li><a href="#lo-trinh"><span class="n">00</span><strong>Lộ trình dự án</strong><span>Phân vai, lộ trình 6 tuần, checklist ngày thi</span></a></li>
+        <li><a href="#the-le"><span class="n">01</span><strong>Tổng hợp thể lệ</strong><span>Luật, sa bàn, vòng thi, câu hỏi cần hỏi BTC</span></a></li>
+        <li><a href="#phan-cung"><span class="n">02</span><strong>Phần cứng</strong><span>Linh kiện, mạch từng khối, sơ đồ chân, lắp ráp, kiểm tra</span></a></li>
+        <li><a href="#firmware"><span class="n">03</span><strong>Nạp & vận hành</strong><span>Build, nạp, các chế độ, nút bấm, âm báo, đọc log</span></a></li>
+        <li><a href="#calib"><span class="n">04</span><strong>Calib và tinh chỉnh</strong><span>10 bước calib, giải thích mọi thông số config.h</span></a></li>
+        <li><a href="#thuat-toan"><span class="n">05</span><strong>Thuật toán</strong><span>Flood Fill, slalom, chạy chéo, planner theo thời gian</span></a></li>
+        <li><a href="#test"><span class="n">06</span><strong>Test trên máy tính</strong><span>Test tự động, xuất hình SVG, trình mô phỏng mms</span></a></li>
+        <li><a href="#ban-do"><span class="n">07</span><strong>Nạp bản đồ có sẵn</strong><span>Ảnh → file mê cung → robot, chế độ SEARCH+MAP</span></a></li>
+        <li><a href="#chien-luoc"><span class="n">08</span><strong>Chiến lược thi</strong><span>Kế hoạch từng lượt, quy trình 3 phút, rủi ro</span></a></li>
+        <li><a href="#tham-khao"><span class="n">09</span><strong>Tham khảo và license</strong><span>Repo GitHub đã dùng, GPL-3.0</span></a></li>
+      </ol>
+
+      <h2>Chế độ robot (bỏ túi khi thi)</h2>
+      <div class="table"><table>
+        <thead><tr><th>#</th><th>Chế độ</th><th>Dùng khi</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>SEARCH</strong></td><td>Lượt đầu ở mê cung mới (nhớ CLEAR MAP trước)</td></tr>
+          <tr><td>2</td><td><strong>SEARCH+MAP</strong></td><td>Có bản đồ dự kiến và BTC cho phép</td></tr>
+          <tr><td>3 · 4 · 5</td><td><strong>RUN1 · RUN2 · RUN3</strong></td><td>Speed run 1.0 · 1.6 · 2.2 m/s (cua nhỏ · cua lớn · chạy chéo)</td></tr>
+          <tr><td>6</td><td>SENSORS</td><td>Kiểm tra cảm biến và pin trước mỗi vòng</td></tr>
+          <tr><td>7 · 8</td><td>STRAIGHT4 · SPIN 720</td><td>Calib bánh</td></tr>
+          <tr><td>9 · 10</td><td>PRINT MAP · CLEAR MAP</td><td>Xem / xóa bản đồ đã lưu</td></tr>
+        </tbody>
+      </table></div>
+      <p class="prose">Bấm <strong>MODE</strong> để chọn (LED nháy N lần = chế độ N), <strong>GO</strong> để bắt đầu, vẫy tay trước cảm biến trước để xuất phát. Bấm <strong>GO</strong> khi đang chạy để dừng khẩn.</p>
+
+      <h2>Bắt đầu nhanh trên máy tính</h2>
+      <div class="prose">
+        <p>Cài công cụ (một lần):</p>
+        <div class="code cmd"><button class="copy" type="button" aria-label="Sao chép lệnh">Copy</button><pre><code>python -m pip install platformio ziglang numpy pillow</code></pre></div>
+        <p>Test thuật toán (phải ra <code>KET QUA: OK</code>):</p>
+        <div class="code cmd"><button class="copy" type="button" aria-label="Sao chép lệnh">Copy</button><pre><code>powershell -ExecutionPolicy Bypass -File scripts/build_host.ps1</code></pre></div>
+        <p>Xem hình robot chạy trên mê cung BTC:</p>
+        <div class="code cmd"><button class="copy" type="button" aria-label="Sao chép lệnh">Copy</button><pre><code>build/test_speedrun.exe --svg build/btc.svg mazes/mysterious_maze_2026.txt 45</code></pre></div>
+        <p>Build và nạp firmware (BlackPill F411 qua ST-Link):</p>
+        <div class="code cmd"><button class="copy" type="button" aria-label="Sao chép lệnh">Copy</button><pre><code>python -m platformio run -t upload</code></pre></div>
+        <p>Phần cứng: STM32F411 BlackPill · 2 × N20 6V 1:20 có encoder · TB6612FNG · 4 cặp IR 940 nm · LiPo 2S · thân ≤ 100 mm, ≤ 120 g. License GPL-3.0.</p>
+      </div>
+    </section>
+
+    {{SECTIONS}}
+  </main>
+</div>
+
+<script>
+(function () {
+  var views = Array.prototype.slice.call(document.querySelectorAll('[data-view]'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('[data-nav]'));
+  function show(name, keepScroll) {
+    var found = views.some(function (v) { return v.dataset.view === name; });
+    if (!found) name = 'tong-quan';
+    views.forEach(function (v) { v.hidden = v.dataset.view !== name; });
+    navLinks.forEach(function (a) {
+      if (a.dataset.nav === name) {
+        a.setAttribute('aria-current', 'page');
+        if (a.scrollIntoView && window.innerWidth <= 860) a.scrollIntoView({ block: 'nearest', inline: 'center' });
+      } else a.removeAttribute('aria-current');
+    });
+    if (!keepScroll) window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  show(location.hash.slice(1), true);
+
+  // Nhay toi muc trong trang (khong doi hash)
+  document.addEventListener('click', function (e) {
+    var j = e.target.closest('[data-jump]');
+    if (j) {
+      var el = document.getElementById(j.dataset.jump);
+      if (el) {
+        var y = el.getBoundingClientRect().top + window.scrollY - (window.innerWidth <= 860 ? 120 : 76);
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+    var c = e.target.closest('.copy');
+    if (c) {
+      var code = c.parentNode.querySelector('code');
+      var text = code ? code.textContent : '';
+      var done = function () { c.textContent = 'Đã chép'; setTimeout(function () { c.textContent = 'Copy'; }, 1400); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(code);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        c.textContent = 'Ctrl+C'; setTimeout(function () { c.textContent = 'Copy'; }, 1800);
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+        else fallback();
+      } catch (err) { fallback(); }
+    }
+  });
+
+  // Chuyen hinh SEARCH / SEARCH+MAP
+  var bS = document.getElementById('btnSearch'), bM = document.getElementById('btnMap');
+  var sS = document.getElementById('svgSearch'), sM = document.getElementById('svgMap');
+  var note = document.getElementById('mazeNote');
+  function maze(useMap) {
+    sS.hidden = useMap; sM.hidden = !useMap;
+    bS.setAttribute('aria-pressed', String(!useMap)); bM.setAttribute('aria-pressed', String(useMap));
+    note.textContent = useMap
+      ? 'SEARCH+MAP: dùng bản đồ dự kiến làm gợi ý, robot chỉ cần đi 120 ô để kiểm chứng đường tối ưu (vẫn đo mọi tường).'
+      : 'SEARCH: không biết trước mê cung, robot dò 246 ô rồi mới chắc chắn có đường tối ưu.';
+  }
+  bS.addEventListener('click', function () { maze(false); });
+  bM.addEventListener('click', function () { maze(true); });
+
+  // Giao dien sang / toi / tu dong (ghi nho tren may nguoi xem)
+  var modes = ['auto', 'light', 'dark'], labels = { auto: 'Tự động', light: 'Sáng', dark: 'Tối' };
+  var btn = document.getElementById('themeBtn'), cur = 'auto';
+  try { cur = localStorage.getItem('mm-theme') || 'auto'; } catch (e) {}
+  function apply(m) {
+    if (m === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', m);
+    btn.textContent = 'Giao diện: ' + labels[m];
+  }
+  apply(cur);
+  btn.addEventListener('click', function () {
+    cur = modes[(modes.indexOf(cur) + 1) % 3];
+    apply(cur);
+    try { localStorage.setItem('mm-theme', cur); } catch (e) {}
+  });
+})();
+</script>
