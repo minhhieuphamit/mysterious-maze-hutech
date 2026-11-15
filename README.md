@@ -1,6 +1,6 @@
 # MYSTERIOUS MAZE 2026: Micromouse (STM32 + IR + DC encoder)
 
-Project dự thi **MYSTERIOUS MAZE 2026** (Khoa Cơ khí - Tự động hóa, Trường Kỹ thuật HUTECH): robot Micromouse tự dò mê cung 16×16 (ô 180 mm lọt lòng, tường 12 mm) và chạy về 4 ô đích trung tâm trong thời gian ngắn nhất.
+Project dự thi **MYSTERIOUS MAZE 2026**: robot Micromouse tự dò mê cung 16×16 (ô 180 mm lọt lòng, tường 12 mm) và chạy về 4 ô đích trung tâm trong thời gian ngắn nhất.
 
 **Đã có:**
 - Thăm dò **Flood Fill** rẽ cong không dừng. Robot tự biết khi nào bản đồ đủ để chạy tối ưu. Lưu bản đồ vào Flash.
